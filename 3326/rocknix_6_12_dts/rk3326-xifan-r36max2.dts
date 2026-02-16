@@ -373,7 +373,20 @@
 		regulator-always-on;
 		regulator-boot-on;
 	};
-	
+
+	vbus_host1: vbus_host1 {
+		compatible = "regulator-fixed";
+		regulator-name = "vbus_wifi";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>;
+		pinctrl-0 = <&vcc5_usb1>;
+		pinctrl-names = "default";
+		enable-active-low;
+	        regulator-always-on;
+		regulator-boot-on;
+	};
+
 	vbus_host: vbus_host {
 		compatible = "regulator-fixed";
 		regulator-name = "vbus_host";
@@ -382,8 +395,7 @@
 		gpio = <&gpio3 RK_PA4 GPIO_ACTIVE_HIGH>;
 		pinctrl-0 = <&vcc5_usb>;
 		pinctrl-names = "default";
-		enable-active-high;
-        regulator-always-on;
+		enable-active-low;
 		regulator-boot-on;
 	};
 };
@@ -542,7 +554,8 @@
 		vcc6-supply = <&vccsys>;
 		vcc7-supply = <&vcc_3v0>;
 		vcc8-supply = <&vccsys>;
-		
+		vcc9-supply = <&usb_midu>;
+	
 		regulators {
 			vdd_logic: DCDC_REG1 {
 				regulator-name = "vdd_logic";
@@ -721,7 +734,11 @@
 				regulator-always-on;
 				regulator-boot-on;
 			};
-			
+			otg_switch: OTG_SWITCH {
+				regulator-name = "OTG_SWITCH";
+				/*regulator-boot-on;*/
+				/*enable-active-low;*/
+			};
 		};
 		
 		rk817_charger: charger {
@@ -833,7 +850,9 @@
 	};
 	
 	u2phy_otg: otg-port {
-        phy-supply = <&vbus_host>;
+		ext-supply = <&vbus_host>;
+	        /*ext-supply = <&otg_switch>;*/
+		switch-gpios = <&gpio0 RK_PA7 GPIO_ACTIVE_LOW>;
 		status = "okay";
 	};
 };
@@ -862,7 +881,7 @@
 
 &usb20_otg {
 	status = "okay";
-	dr_mode = "host";
+	dr_mode = "otg";
 };
 
 &vopb {
@@ -924,7 +943,13 @@
 			rockchip,pins = <3 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
-	
+
+	vcc5-usb1 {
+		vcc5_usb1: vcc5-usb1 {
+			rockchip,pins = <0 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
 	gpio-led {
 		led_pins: led-pins {
 			rockchip,pins =
@@ -954,7 +979,7 @@
 			rockchip,pins = <0 RK_PA4 1 &pcfg_pull_none>;
 		};
 	};
-	
+
 	speaker {
 		spk_amp_enable_h: spk-amp-enable-h {
 			rockchip,pins =
